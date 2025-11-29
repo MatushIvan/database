@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    container_name: rust_db
+    restart: always
+    environment:
+      POSTGRES_USER: rust
+      POSTGRES_PASSWORD: rust
+      POSTGRES_DB: rust_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: .
+    command: ["/bin/sh", "-c", "./rust_db_indexing"]
+    container_name: rust_api
+    restart: always
+    environment:
+      RUST_LOG: "debug"
+      APP_ENV: "development"
+      DATABASE_URL: "postgres://rust:rust@db:5432/rust_db"
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
